@@ -243,7 +243,8 @@ if __name__ == "__main__":
         if layer[0].startswith('Dense'):
             n_mlp += 1
 
-    g = Generator(size, 512, n_mlp, channel_multiplier=args.channel_multiplier)
+    style_dim = 1024
+    g = Generator(size, style_dim, n_mlp, channel_multiplier=args.channel_multiplier)
     state_dict = g.state_dict()
     state_dict = fill_statedict(state_dict, g_ema.vars, size, n_mlp)
 
@@ -254,7 +255,7 @@ if __name__ == "__main__":
     ckpt = {"g_ema": state_dict, "latent_avg": latent_avg}
 
     if args.gen:
-        g_train = Generator(size, 512, n_mlp, channel_multiplier=args.channel_multiplier)
+        g_train = Generator(size, style_dim, n_mlp, channel_multiplier=args.channel_multiplier)
         g_train_state = g_train.state_dict()
         g_train_state = fill_statedict(g_train_state, generator.vars, size, n_mlp)
         ckpt["g"] = g_train_state
@@ -269,11 +270,11 @@ if __name__ == "__main__":
     torch.save(ckpt, name + ".pt")
 
     batch_size = {256: 16, 512: 9, 1024: 4}
-    n_sample = batch_size.get(size, 25)
+    n_sample = batch_size.get(style_dim, 25)
 
     g = g.to(device)
 
-    z = np.random.RandomState(0).randn(n_sample, 512).astype("float32")
+    z = np.random.RandomState(0).randn(n_sample, style_dim).astype("float32")
 
     with torch.no_grad():
         img_pt, _ = g(

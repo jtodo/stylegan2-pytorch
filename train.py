@@ -438,8 +438,8 @@ if __name__ == "__main__":
         torch.distributed.init_process_group(backend="nccl", init_method="env://")
         synchronize()
 
-    args.latent = 512
-    args.n_mlp = 8
+    args.latent = 1024
+    args.n_mlp = 4
 
     args.start_iter = 0
 
@@ -491,6 +491,7 @@ if __name__ == "__main__":
         discriminator.load_state_dict(ckpt["d"])
         g_ema.load_state_dict(ckpt["g_ema"])
 
+        # Comment out only for first time
         g_optim.load_state_dict(ckpt["g_optim"])
         d_optim.load_state_dict(ckpt["d_optim"])
 

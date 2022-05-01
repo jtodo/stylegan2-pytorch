@@ -416,15 +416,14 @@ class Generator(nn.Module):
         self.style = nn.Sequential(*layers)
 
         self.channels = {
-            4: 512,
-            8: 512,
-            16: 512,
-            32: 512,
-            64: 256 * channel_multiplier,
-            128: 128 * channel_multiplier,
-            256: 64 * channel_multiplier,
-            512: 32 * channel_multiplier,
-            1024: 16 * channel_multiplier,
+            4: 1024,
+            8: 1024,
+            16: 1024,
+            32: 1024,
+            64: 512 * channel_multiplier,
+            128: 256 * channel_multiplier,
+            256: 128 * channel_multiplier,
+            512: 64 * channel_multiplier
         }
 
         self.input = ConstantInput(self.channels[4])
@@ -670,7 +669,7 @@ class Discriminator(nn.Module):
         self.stddev_group = 4
         self.stddev_feat = 1
 
-        self.final_conv = ConvLayer(in_channel + 1, channels[4], 3)
+        self.final_conv = ConvLayer(in_channel + 4, channels[4], 3)
         self.final_linear = nn.Sequential(
             EqualLinear(channels[4] * 4 * 4, channels[4], activation="fused_lrelu"),
             EqualLinear(channels[4], 1),
@@ -686,7 +685,7 @@ class Discriminator(nn.Module):
         )
         stddev = torch.sqrt(stddev.var(0, unbiased=False) + 1e-8)
         stddev = stddev.mean([2, 3, 4], keepdims=True).squeeze(2)
-        stddev = stddev.repeat(group, 1, height, width)
+        stddev = stddev.repeat(group, 4, height, width)
         out = torch.cat([out, stddev], 1)
 
         out = self.final_conv(out)
